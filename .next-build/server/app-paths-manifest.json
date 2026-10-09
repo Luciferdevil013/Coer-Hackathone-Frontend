@@ -1,0 +1,14 @@
+{
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js",
+  "/(app)/actions/page": "app/(app)/actions/page.js",
+  "/(app)/audit/page": "app/(app)/audit/page.js",
+  "/(app)/clean/page": "app/(app)/clean/page.js",
+  "/(app)/findings/[id]/page": "app/(app)/findings/[id]/page.js",
+  "/(app)/rules/page": "app/(app)/rules/page.js",
+  "/(app)/sources/page": "app/(app)/sources/page.js",
+  "/(app)/security/page": "app/(app)/security/page.js",
+  "/(app)/dashboard/page": "app/(app)/dashboard/page.js",
+  "/(app)/report/page": "app/(app)/report/page.js"
+}

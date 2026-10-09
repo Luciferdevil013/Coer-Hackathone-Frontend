@@ -1,0 +1,15 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(app)/layout,_N_T_/(app)/sources/layout,_N_T_/(app)/sources/page,_N_T_/sources"
+  },
+  "routeCache": {
+    "key": "/route-cache/APP_PAGE/abe6c0f3ea6c13ecf0ecec1059e958f881683c48ff53d62cfd5a1a7d112082c6/$/sources",
+    "owner": {
+      "kind": "APP_PAGE",
+      "sourceRoute": "/(app)/sources/page"
+    },
+    "isFallback": false
+  }
+}

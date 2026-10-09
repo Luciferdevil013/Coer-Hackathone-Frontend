@@ -1,0 +1,14 @@
+{
+  "/favicon.ico/route": "/favicon.ico",
+  "/_not-found/page": "/_not-found",
+  "/page": "/",
+  "/(app)/actions/page": "/actions",
+  "/(app)/audit/page": "/audit",
+  "/(app)/clean/page": "/clean",
+  "/(app)/findings/[id]/page": "/findings/[id]",
+  "/(app)/rules/page": "/rules",
+  "/(app)/sources/page": "/sources",
+  "/(app)/security/page": "/security",
+  "/(app)/dashboard/page": "/dashboard",
+  "/(app)/report/page": "/report"
+}
