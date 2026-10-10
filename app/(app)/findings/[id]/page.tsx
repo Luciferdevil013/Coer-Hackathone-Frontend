@@ -119,7 +119,8 @@ export default function FindingPage() {
             : f.kind === "data_quality" ? <QualityPanel f={f} />
               : f.kind === "unused_columns" ? <UnusedColumns f={f} />
               : f.kind === "anomalous_values" ? <AnomalyPanel f={f} />
-                : f.kind === "sensitive_data" ? <SensitivePanel f={f} />
+                : f.kind === "sensitive_data" || f.kind === "pii_in_text" ? <SensitivePanel f={f} />
+                  : f.kind === "unreadable_files" ? <UnreadablePanel f={f} />
                   : plan.length > 0 && <PlanTable f={f} plan={plan} />}
         </div>
 
@@ -247,9 +248,35 @@ function SensitivePanel({ f }: { f: FindingDetail }) {
           <b>DPDP Act:</b> this data has been unused for {fmtNum(f.details.days_since_use)} days, past the retention window. Personal data must be erased once its purpose is served. Give users 48 hours&apos; notice first.
         </div>
       )}
-      {f.target_asset_ids[0] && f.assets[f.target_asset_ids[0]]?.kind === "tabular" && (
+      {(f.details.examples ?? []).length > 0 && (
+        <div className="mt-4">
+          <div className="label mb-1.5">Examples (masked)</div>
+          <ul className="space-y-1.5">
+            {(f.details.examples as string[]).map((x, i) => <li key={i} className="rounded-md bg-ink-850 px-2.5 py-1.5 font-mono text-xs text-fg-2 [overflow-wrap:anywhere]">{x}</li>)}
+          </ul>
+        </div>
+      )}
+      {f.kind === "sensitive_data" && f.target_asset_ids[0] && f.assets[f.target_asset_ids[0]]?.kind === "tabular" && (
         <Link href={`/clean?asset=${f.target_asset_ids[0]}&prompt=${encodeURIComponent("Mask Aadhaar, PAN and bank account numbers")}`} className="btn-secondary mt-4"><Wand2 className="h-4 w-4" /> Create a masked copy in Clean Studio</Link>
       )}
+    </div>
+  );
+}
+
+function UnreadablePanel({ f }: { f: FindingDetail }) {
+  const files: { asset_id: string; name: string; reason: string }[] = f.details.files ?? [];
+  return (
+    <div className="card overflow-hidden">
+      <div className="border-b border-line px-5 py-3 font-semibold">Files not scanned</div>
+      <ul className="divide-y divide-line">
+        {files.map((x) => (
+          <li key={x.asset_id} className="px-5 py-3 text-sm">
+            <div className="font-mono text-[13px] text-fg [overflow-wrap:anywhere]">{x.name}</div>
+            <div className="mt-0.5 text-fg-3">{x.reason}</div>
+          </li>
+        ))}
+      </ul>
+      <div className="border-t border-line px-5 py-3 text-xs text-fg-3">Nothing in these files was checked. Open them in their original app, save as CSV or XLSX, upload again and re-scan.</div>
     </div>
   );
 }
@@ -357,7 +384,8 @@ function DuplicateReview({ f, wsId, onSaved }: { f: FindingDetail; wsId: string;
 
   async function saveAndClean() {
     if (await save()) {
-      router.push(`/clean?asset=${f.target_asset_ids[0]}&prompt=${encodeURIComponent("Trim whitespace, normalize emails, standardize phone numbers to +91 format, remove duplicate records by email and quarantine rows missing email")}`);
+      const prompt = f.details.suggested_prompt || "Trim whitespace in all columns";
+      router.push(`/clean?asset=${f.target_asset_ids[0]}&prompt=${encodeURIComponent(prompt)}`);
     }
   }
 
@@ -409,9 +437,15 @@ function DuplicateReview({ f, wsId, onSaved }: { f: FindingDetail; wsId: string;
         {!shown.length && <div className="p-6 text-center text-sm text-fg-3">No groups in this view.</div>}
       </div>
       <div className="flex flex-wrap items-center gap-2 border-t border-line bg-ink-850 px-5 py-3">
-        <span className="text-xs text-fg-3">{merged} groups marked to merge · exact duplicates are removed by the dedupe step</span>
+        <span className="text-xs text-fg-3">
+          {f.action === "KEEP"
+            ? "Identical entries are preserved as authentic multi-user reviews."
+            : `${merged} groups marked to merge · exact duplicates are removed by the dedupe step`}
+        </span>
         <button className="btn-secondary ml-auto" onClick={() => save()} disabled={saving || !Object.keys(decisions).length}>{saving && <Spinner />} Save decisions</button>
-        <button className="btn-primary" onClick={saveAndClean} disabled={saving}><Wand2 className="h-4 w-4" /> Save & clean with decisions</button>
+        <button className="btn-primary" onClick={saveAndClean} disabled={saving}>
+          <Wand2 className="h-4 w-4" /> {f.action === "KEEP" ? "Open in Clean Studio" : "Save & clean with decisions"}
+        </button>
       </div>
     </div>
   );

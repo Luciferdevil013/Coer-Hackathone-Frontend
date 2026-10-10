@@ -9,7 +9,7 @@ import {
 import { api } from "@/lib/api";
 import { fmtBytes, timeAgo } from "@/lib/format";
 import { SummaryProvider, useSummary } from "./hooks";
-import { Wordmark, useToast } from "./ui";
+import { Empty, Wordmark, useToast } from "./ui";
 import { useWorkspace } from "./workspace";
 
 type NavItem = { href: string; label: string; title: string; icon: typeof Zap; badge?: "open" | "risk" };
@@ -139,6 +139,22 @@ function Topbar({ onMenu }: { onMenu: () => void }) {
   );
 }
 
+/** Pages that read workspace data would wait forever with no workspace; Overview and Data Sources
+ *  have their own empty states (load the demo, create a workspace), so they always render. */
+function WorkspaceGate({ children }: { children: React.ReactNode }) {
+  const path = usePathname();
+  const { current, loading } = useWorkspace();
+  if (loading || current || path === "/dashboard" || path === "/sources") return <>{children}</>;
+  return (
+    <Empty icon={<Database className="h-9 w-9" />} title="No workspace yet"
+      body="Create a workspace and upload files on Data Sources, or load the two demo companies from the Overview."
+      action={<div className="flex flex-wrap gap-2">
+        <Link className="btn-primary" href="/sources">Create a workspace</Link>
+        <Link className="btn-secondary" href="/dashboard">Load demo companies</Link>
+      </div>} />
+  );
+}
+
 export function Shell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
@@ -156,7 +172,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       )}
       <Topbar onMenu={() => setOpen(true)} />
       <main className="mx-auto max-w-[1400px] px-4 py-6 md:px-8 md:py-8">
-        <div className="animate-view">{children}</div>
+        <div className="animate-view"><WorkspaceGate>{children}</WorkspaceGate></div>
       </main>
     </div>
     </SummaryProvider>

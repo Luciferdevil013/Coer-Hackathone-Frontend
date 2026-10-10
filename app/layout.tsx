@@ -22,8 +22,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} ${instrument.variable}`}>
-      <body className="font-sans">
+    // Browser extensions (Storylane, Grammarly, ...) add classes/attributes to <html>/<body> before
+    // hydration; suppressHydrationWarning ignores attribute diffs on these two elements only, not their children.
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} ${instrument.variable}`} suppressHydrationWarning>
+      <body className="font-sans" suppressHydrationWarning>
         <WorkspaceProvider>
           <ToastProvider>{children}</ToastProvider>
         </WorkspaceProvider>

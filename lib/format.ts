@@ -100,18 +100,20 @@ export const KIND_LABEL: Record<string, string> = {
   data_quality: "Data quality",
   unused_columns: "Unused columns",
   anomalous_values: "Anomalous values",
+  pii_in_text: "Personal data in text",
+  unreadable_files: "Unreadable files",
 };
 
 export const FILTER_GROUPS: { id: string; label: string; kinds: string[] }[] = [
   { id: "all", label: "All", kinds: [] },
   { id: "dup", label: "Duplicates", kinds: ["exact_duplicate", "near_duplicate", "duplicate_rows"] },
   { id: "backup", label: "Backups", kinds: ["redundant_backup"] },
-  { id: "sensitive", label: "Sensitive", kinds: ["sensitive_data", "secret_exposed"] },
+  { id: "sensitive", label: "Sensitive", kinds: ["sensitive_data", "secret_exposed", "pii_in_text"] },
   { id: "unused", label: "Unused", kinds: ["unused_columns"] },
   { id: "cold", label: "Cold data", kinds: ["stale_large"] },
   { id: "versions", label: "Versions", kinds: ["version_chain"] },
   { id: "anomaly", label: "Anomalies", kinds: ["anomalous_values"] },
-  { id: "quality", label: "Quality", kinds: ["data_quality"] },
+  { id: "quality", label: "Quality", kinds: ["data_quality", "unreadable_files"] },
 ];
 
 export const SOURCE_META: Record<string, { abbr: string; name: string; kind: string }> = {

@@ -146,8 +146,8 @@ function ActionCenter() {
                     <td className="td pr-[18px]">
                       {!done ? (
                         <div className="flex justify-end gap-1.5">
-                          {f.action === "CLEAN" ? (
-                            <Link href={`/findings/${f.id}`} className="btn-light btn-sm">Clean</Link>
+                          {f.action === "CLEAN" || f.action === "KEEP" ? (
+                            <Link href={`/findings/${f.id}`} className="btn-light btn-sm">{f.action === "CLEAN" ? "Clean" : "Review"}</Link>
                           ) : (
                             <button className={`btn-sm ${f.action === "DELETE" ? "btn-danger" : "btn-light"}`} disabled={!!busy}
                               onClick={() => (f.action === "DELETE" ? setConfirm({ f, action: "APPLY" }) : act(f, "APPLY"))}>

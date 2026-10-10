@@ -111,9 +111,47 @@ export interface PlanResponse {
 export interface Run {
   id: string; asset_id: string; prompt: string; spec: PipelineSpec; planner: string; rule_set_version: number;
   status: string; output_asset_id: string | null; approved_by: string; created_at: string; committed_at: string | null;
-  metrics: { totals: Record<string, number>; warnings: string[];
+  metrics: { totals: Record<string, number>; warnings: string[]; vdt?: VirtualTreeMeta;
+    commit?: { mode: "new_file" | "in_place"; commit_id?: string; output?: string; quarantine?: string };
     steps: { id: string; op: string; title: string; rows_in: number; rows_out: number; cells_changed: number;
       rows_removed: number; rows_quarantined: number; duration_ms: number; notes: string[] }[] };
   preview: { changes: { row: number; column: string; before: string; after: string; step: string; op: string }[];
     quarantine: Record<string, string | number>[]; output_head: Record<string, string | number>[]; columns: string[] };
+}
+
+// ---------------------------------------------------------------- virtual data tree
+
+export type PatchOp = "DELETE" | "QUARANTINE" | "REDACT" | "NORMALIZE";
+
+export interface VirtualTreeMeta {
+  engine: string; target_file: string; source_sha256: string; source_bytes: number; candidate_bytes: number | null;
+  total_records: number; patch_entries: number; in_place: { supported: boolean; reason: string; format: string };
+  virtual_mutations: { pruned_duplicates: number; quarantined_rows: number; masked_pii_cells: number; normalized_cells: number;
+    dropped_columns: string[]; rows_touched: number; storage_delta_bytes: number | null };
+}
+
+export interface PatchCell { op: PatchOp; col: string; before: string; after: string; step: string; operator: string }
+export interface DiffRow {
+  row_id: number; status: "DELETE" | "QUARANTINE" | "MODIFIED"; reason: string; kept_row: number | null;
+  values: Record<string, string>; cells: Record<string, PatchCell>;
+}
+export interface DiffResponse {
+  columns: string[]; dropped_columns: string[]; rows: DiffRow[]; total_rows: number; offset: number; limit: number;
+  counts: Record<PatchOp, number>;
+}
+
+export interface ImpactResponse {
+  safe: boolean;
+  checks: { name: string; status: "pass" | "warn" | "fail" | "info"; detail: string }[];
+  aggregates: { column: string; sum_before: number; sum_after: number; mean_before: number; mean_after: number; mean_drift_pct: number;
+    median_before: number; median_after: number; median_drift_pct: number }[];
+  distributions: { column: string; max_share_shift_pp: number; top: { value: string; before: number; after: number }[] }[];
+}
+
+export interface VaultCommit {
+  id: string; run_id: string; asset_id: string; file_name: string; codec: string; vault_file: string;
+  original_sha256: string; original_bytes: number; vault_bytes: number; new_sha256: string; new_bytes: number;
+  compression_ratio: number | null; status: "committed" | "rolled_back"; actor: string; created_at: string;
+  rolled_back_by: string; rolled_back_at: string | null; mutations: Partial<VirtualTreeMeta["virtual_mutations"]>;
+  quarantine_file: string | null;
 }
